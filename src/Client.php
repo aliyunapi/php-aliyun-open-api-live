@@ -21,7 +21,7 @@
 
 namespace aliyun\live;
 
-use aliyun\live\auth\ShaHmac1Signer;
+use aliyun\core\auth\ShaHmac1Signer;
 
 class Client
 {
@@ -39,9 +39,7 @@ class Client
      * @var \aliyun\core\auth\SignerInterface 签名算法实例
      */
     public $signer;
-
-
-
+    
     /**
      * @var \GuzzleHttp\Client
      */
@@ -80,7 +78,6 @@ class Client
         }
         return $this->_httpClient;
     }
-
 
     /**
      * @param array $params
@@ -132,29 +129,5 @@ class Client
         return $url;
     }
 
-    /**
-     * @param array $parameters
-     * @return string
-     */
-    private function computeSignature($parameters)
-    {
-        ksort($parameters);
-        $canonicalizedQueryString = '';
-        foreach ($parameters as $key => $value) {
-            $canonicalizedQueryString .= '&' . $this->percentEncode($key) . '=' . $this->percentEncode($value);
-        }
-        $stringToSign = 'GET&%2F&' . $this->percentencode(substr($canonicalizedQueryString, 1));
-        $signature = $this->signer->signString($stringToSign, $this->accessSecret . "&");
 
-        return $signature;
-    }
-
-    protected function percentEncode($str)
-    {
-        $res = urlencode($str);
-        $res = preg_replace('/\+/', '%20', $res);
-        $res = preg_replace('/\*/', '%2A', $res);
-        $res = preg_replace('/%7E/', '~', $res);
-        return $res;
-    }
 }
