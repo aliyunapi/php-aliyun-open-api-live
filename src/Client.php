@@ -26,36 +26,24 @@ use aliyun\core\auth\ShaHmac1Signer;
 class Client extends \aliyun\core\Client
 {
     /**
-     * @var string
+     * 初始化
      */
-    public $accessKeyId;
-
-    /**
-     * @var string
-     */
-    public $accessSecret;
-
-    /**
-     * @var \aliyun\core\auth\SignerInterface 签名算法实例
-     */
-    public $signer;
-
-    /**
-     * @var \GuzzleHttp\Client
-     */
-    public $_httpClient;
-
     public function init()
     {
-        $this->signer = new ShaHmac1Signer();
+        parent::init();
+
     }
 
     /**
      * @param array $params
      * @return string
      */
-    public function createRequest(array $params)
+    public function createRequest()
     {
+        return new Request([
+            'accessKeyId' => $this->accessKeyId,
+            'accessSecret' => $this->accessSecret,
+        ]);
         $params['Format'] = 'JSON';
         $params['Version'] = '2016-11-01';
         $params['AccessKeyId'] = $this->accessKeyId;
@@ -83,47 +71,5 @@ class Client extends \aliyun\core\Client
         return $response;
     }
 
-    /**
-     * 合并基础URL和参数
-     * @param string $url base URL.
-     * @param array $params GET params.
-     * @return string composed URL.
-     */
-    protected function composeUrl($url, array $params = [])
-    {
-        if (strpos($url, '?') === false) {
-            $url .= '?';
-        } else {
-            $url .= '&';
-        }
-        $url .= http_build_query($params, '', '&', PHP_QUERY_RFC3986);
-        return $url;
-    }
-
-    /**
-     * @param array $parameters
-     * @return string
-     */
-    private function computeSignature($parameters)
-    {
-        ksort($parameters);
-        $canonicalizedQueryString = '';
-        foreach ($parameters as $key => $value) {
-            $canonicalizedQueryString .= '&' . $this->percentEncode($key) . '=' . $this->percentEncode($value);
-        }
-        $stringToSign = 'GET&%2F&' . $this->percentencode(substr($canonicalizedQueryString, 1));
-        $signature = $this->signer->signString($stringToSign, $this->accessSecret . "&");
-
-        return $signature;
-    }
-
-    protected function percentEncode($str)
-    {
-        $res = urlencode($str);
-        $res = preg_replace('/\+/', '%20', $res);
-        $res = preg_replace('/\*/', '%2A', $res);
-        $res = preg_replace('/%7E/', '~', $res);
-        return $res;
-    }
 
 }

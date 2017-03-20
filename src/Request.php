@@ -6,20 +6,43 @@
  */
 namespace aliyun\live;
 
-class Request
+use aliyun\core\Base;
+use aliyun\core\auth\ShaHmac1Signer;
+
+class Request extends Base
 {
-    protected $queryParameters = [
+    public $accessKeyId;
 
-    ];
+    public $accessSecret;
 
-    public function __construct($p)
+
+
+    /**
+     * @var \GuzzleHttp\Client
+     */
+    public $_httpClient;
+
+    public function init(){
+        parent::init();
+
+    }
+
+    /**
+     * 获取Http Client
+     * @return \GuzzleHttp\Client
+     */
+    public function getHttpClient()
     {
-        $this->queryParameters = [
-            'Format' => 'JSON',
-            'Version' => '2016-11-01',
-            'Timestamp' => gmdate('Y-m-d\TH:i:s\Z'),
-            'SignatureNonce' => uniqid(),
-        ];
+        if (!is_object($this->_httpClient)) {
+            $this->_httpClient = new \GuzzleHttp\Client([
+                'verify' => false,
+                'http_errors' => false,
+                'connect_timeout' => 3,
+                'read_timeout' => 10,
+                'debug' => false,
+            ]);
+        }
+        return $this->_httpClient;
     }
 
     /**
@@ -46,7 +69,37 @@ class Request
      */
     protected function _dispatchRequest($params)
     {
+        $params['Format'] = 'JSON';
+        $params['Version'] = '2016-11-01';
+        $params['AccessKeyId'] = $this->accessKeyId;
+        $params['SignatureMethod'] = 'HMAC-SHA1';
+        $params['Timestamp'] = gmdate('Y-m-d\TH:i:s\Z');
+        $params['SignatureVersion'] = '1.0';
+        $params['SignatureNonce'] = uniqid();
+        //签名
+        $params['Signature'] = $this->computeSignature($params);
+        $requestUrl = $this->composeUrl('http://live.aliyuncs.com/', $params);
 
+        $response = $request = $this->getHttpClient()->request('GET', $requestUrl);
+        return $response;
+
+    }
+
+    /**
+     * 合并基础URL和参数
+     * @param string $url base URL.
+     * @param array $params GET params.
+     * @return string composed URL.
+     */
+    protected function composeUrl($url, array $params = [])
+    {
+        if (strpos($url, '?') === false) {
+            $url .= '?';
+        } else {
+            $url .= '&';
+        }
+        $url .= http_build_query($params, '', '&', PHP_QUERY_RFC3986);
+        return $url;
     }
 
     /**
@@ -61,7 +114,7 @@ class Request
             $canonicalizedQueryString .= '&' . $this->percentEncode($key) . '=' . $this->percentEncode($value);
         }
         $stringToSign = 'GET&%2F&' . $this->percentencode(substr($canonicalizedQueryString, 1));
-        $signature = $this->signer->signString($stringToSign, $this->accessSecret . "&");
+        $signature = base64_encode(hash_hmac('sha1', $stringToSign, $this->accessSecret . "&", true));
 
         return $signature;
     }
