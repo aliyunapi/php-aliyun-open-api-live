@@ -23,7 +23,7 @@ namespace aliyun\live;
 
 use aliyun\core\auth\ShaHmac1Signer;
 
-class Client
+class Client extends \aliyun\core\Client
 {
     /**
      * @var string
@@ -45,38 +45,9 @@ class Client
      */
     public $_httpClient;
 
-    /**
-     * Request constructor.
-     * @param array $config
-     */
-    public function __construct($config = [])
+    public function init()
     {
-        foreach ($config as $name => $value) {
-            $this->{$name} = $value;
-        }
-        $this->init();
-    }
-
-    public function init(){
         $this->signer = new ShaHmac1Signer();
-    }
-
-    /**
-     * 获取Http Client
-     * @return \GuzzleHttp\Client
-     */
-    public function getHttpClient()
-    {
-        if (!is_object($this->_httpClient)) {
-            $this->_httpClient = new \GuzzleHttp\Client([
-                'verify' => false,
-                'http_errors' => false,
-                'connect_timeout' => 3,
-                'read_timeout' => 10,
-                'debug' => false,
-            ]);
-        }
-        return $this->_httpClient;
     }
 
     /**
@@ -129,5 +100,30 @@ class Client
         return $url;
     }
 
+    /**
+     * @param array $parameters
+     * @return string
+     */
+    private function computeSignature($parameters)
+    {
+        ksort($parameters);
+        $canonicalizedQueryString = '';
+        foreach ($parameters as $key => $value) {
+            $canonicalizedQueryString .= '&' . $this->percentEncode($key) . '=' . $this->percentEncode($value);
+        }
+        $stringToSign = 'GET&%2F&' . $this->percentencode(substr($canonicalizedQueryString, 1));
+        $signature = $this->signer->signString($stringToSign, $this->accessSecret . "&");
+
+        return $signature;
+    }
+
+    protected function percentEncode($str)
+    {
+        $res = urlencode($str);
+        $res = preg_replace('/\+/', '%20', $res);
+        $res = preg_replace('/\*/', '%2A', $res);
+        $res = preg_replace('/%7E/', '~', $res);
+        return $res;
+    }
 
 }
