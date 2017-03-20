@@ -21,73 +21,126 @@
 
 namespace aliyun\live;
 
+use aliyun\live\auth\ShaHmac1Signer;
+
 class Client
 {
-    public $secretId;
-    public $secretKey;
-
-    public $version = '2016-11-01';
+    /**
+     * @var string
+     */
+    public $accessKeyId;
 
     /**
-     * @var string 时间格式
+     * @var string
      */
-    public $dateTimeFormat = 'Y-m-d\TH:i:s\Z';
+    public $accessSecret;
+
+    /**
+     * @var \aliyun\core\auth\SignerInterface 签名算法实例
+     */
+    public $signer;
 
     /**
      * Client constructor.
-     * @param string $secretId
-     * @param string $secretKey
+     * @param string $accessKeyId
+     * @param string $accessSecret
      */
-    public function __construct($secretId, $secretKey)
+    public function __construct($accessKeyId, $accessSecret)
     {
-        $this->secretId = $secretId;
-        $this->secretKey = $secretKey;
+        $this->accessKeyId = $accessKeyId;
+        $this->accessSecret = $accessSecret;
+        $this->signer = new ShaHmac1Signer();
     }
 
-    public function request(array $params)
+    /**
+     * @var \GuzzleHttp\Client
+     */
+    public $_httpClient;
+
+    /**
+     * 获取Http Client
+     * @return \GuzzleHttp\Client
+     */
+    public function getHttpClient()
+    {
+        if (!is_object($this->_httpClient)) {
+            $this->_httpClient = new \GuzzleHttp\Client([
+                'verify' => false,
+                'http_errors' => false,
+                'connect_timeout' => 3,
+                'read_timeout' => 10,
+                'debug' => false,
+            ]);
+        }
+        return $this->_httpClient;
+    }
+
+
+    /**
+     * @param array $params
+     * @return string
+     */
+    public function createRequest(array $params)
     {
         $params['Format'] = 'JSON';
-        $params['Version'] = $this->version;
-        $params['AccessKeyId'] = $this->secretId;
-        $params['SignatureMethod'] = 'HMAC-SHA1';
-        $params['Timestamp'] = gmdate($this->dateTimeFormat);
-        $params['SignatureVersion'] = '1.0';
+        $params['Version'] = '2016-11-01';
+        $params['AccessKeyId'] = $this->accessKeyId;
+        $params['SignatureMethod'] = $this->signer->getSignatureMethod();
+        $params['Timestamp'] = gmdate('Y-m-d\TH:i:s\Z');
+        $params['SignatureVersion'] = $this->signer->getSignatureVersion();
         $params['SignatureNonce'] = uniqid();
-        $plainText = $this->makeSignPlainText($params);
         //签名
-        $plainText = 'GET&%2F&' . $this->percentencode(substr($plainText, 1));
-        $params['Signature'] = base64_encode(hash_hmac('sha1', $plainText, $this->secretKey . "&", true));
-        $client = new \GuzzleHttp\Client([
-            'verify' => false,
-            'http_errors' => false,
-            'connect_timeout' => 3,
-            'read_timeout' => 10,
-            'debug' => true,
-        ]);
-        $requestUrl = 'http://live.aliyuncs.com/?';
-        foreach ($params as $apiParamKey => $apiParamValue) {
-            $requestUrl .= "$apiParamKey=" . urlencode($apiParamValue) . "&";
-        }
-        $requestUrl = substr($requestUrl, 0, -1);
-        $request = new \GuzzleHttp\Psr7\Request('GET', $requestUrl, [
-            'client' => 'php/1.0.0',
-        ]);
-        $response = $client->send($request);
+        $params['Signature'] = $this->computeSignature($params);
+        $requestUrl = $this->composeUrl('http://live.aliyuncs.com/', $params);
+        $response = $this->sendRequest('GET', $requestUrl);
         return $response->getBody()->getContents();
     }
 
     /**
-     * @param $parameters
-     * @return mixed
+     * Sends HTTP request.
+     * @param string $method request type.
+     * @param string $url request URL.
+     * @param array $options request params.
+     * @return object response.
      */
-    private function makeSignPlainText($parameters)
+    public function sendRequest($method, $url, array $options = [])
+    {
+        $response = $request = $this->getHttpClient()->request($method, $url, $options);
+        return $response;
+    }
+
+    /**
+     * 合并基础URL和参数
+     * @param string $url base URL.
+     * @param array $params GET params.
+     * @return string composed URL.
+     */
+    protected function composeUrl($url, array $params = [])
+    {
+        if (strpos($url, '?') === false) {
+            $url .= '?';
+        } else {
+            $url .= '&';
+        }
+        $url .= http_build_query($params, '', '&', PHP_QUERY_RFC3986);
+        return $url;
+    }
+
+    /**
+     * @param array $parameters
+     * @return string
+     */
+    private function computeSignature($parameters)
     {
         ksort($parameters);
         $canonicalizedQueryString = '';
         foreach ($parameters as $key => $value) {
             $canonicalizedQueryString .= '&' . $this->percentEncode($key) . '=' . $this->percentEncode($value);
         }
-        return $canonicalizedQueryString;
+        $stringToSign = 'GET&%2F&' . $this->percentencode(substr($canonicalizedQueryString, 1));
+        $signature = $this->signer->signString($stringToSign, $this->accessSecret . "&");
+
+        return $signature;
     }
 
     protected function percentEncode($str)
@@ -98,5 +151,4 @@ class Client
         $res = preg_replace('/%7E/', '~', $res);
         return $res;
     }
-
 }
