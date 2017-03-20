@@ -39,7 +39,7 @@ class Client
      * @var \aliyun\core\auth\SignerInterface 签名算法实例
      */
     public $signer;
-    
+
     /**
      * @var \GuzzleHttp\Client
      */
