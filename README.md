@@ -22,7 +22,10 @@ to the require section of your composer.json.
 使用方式
 ------------
 ```
-$client = new \aliyun\live\Client('123456', '123456');
+$client = new \aliyun\live\Client([
+    'accessKeyId' => '123456',
+    'accessSecret' => '123456'
+]);
 $package = [
     'Action' => 'DescribeLiveStreamsPublishList',
     'DomainName' => 'live.cctv.com',

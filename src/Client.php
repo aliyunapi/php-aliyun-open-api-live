@@ -40,22 +40,28 @@ class Client
      */
     public $signer;
 
-    /**
-     * Client constructor.
-     * @param string $accessKeyId
-     * @param string $accessSecret
-     */
-    public function __construct($accessKeyId, $accessSecret)
-    {
-        $this->accessKeyId = $accessKeyId;
-        $this->accessSecret = $accessSecret;
-        $this->signer = new ShaHmac1Signer();
-    }
+
 
     /**
      * @var \GuzzleHttp\Client
      */
     public $_httpClient;
+
+    /**
+     * Request constructor.
+     * @param array $config
+     */
+    public function __construct($config = [])
+    {
+        foreach ($config as $name => $value) {
+            $this->{$name} = $value;
+        }
+        $this->init();
+    }
+
+    public function init(){
+        $this->signer = new ShaHmac1Signer();
+    }
 
     /**
      * 获取Http Client
