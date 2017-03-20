@@ -25,7 +25,7 @@ to the require section of your composer.json.
 $client = new \aliyun\live\Client('123456', '123456');
 $package = [
     'Action' => 'DescribeLiveStreamsPublishList',
-    'DomainName' => 'live.opencoding.tv',
+    'DomainName' => 'live.cctv.com',
     'StartTime' => gmdate('Y-m-d\TH:i:s\Z', strtotime('2017-03-15')),
     'EndTime' => gmdate('Y-m-d\TH:i:s\Z', strtotime('2017-04-01')),
 ];
