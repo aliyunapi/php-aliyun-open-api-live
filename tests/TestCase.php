@@ -1,0 +1,45 @@
+<?php
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+namespace aliyun\test;
+
+use aliyun\core\Client;
+
+use aliyun\core\profile\DefaultProfile;
+
+class TestCase extends \PHPUnit_Framework_TestCase
+{
+
+    public $client = null;
+
+    function setUp()
+    {
+        $iClientProfile = DefaultProfile::getProfile("cn-hangzhou", "5slyhuy4sv30bmppvgew0rps", "NGYL1I7hXC6SgSqkcE5DJdPgJM8=");
+        $this->client = new Client($iClientProfile);
+    }
+
+
+    function getProperty($propertyKey)
+    {
+        $accessKey = "";
+        $accessSecret = "";
+        $iClientProfile = DefaultProfile::getProfile("cn-hangzhou", "5slyhuy4sv30bmppvgew0rps", "NGYL1I7hXC6SgSqkcE5DJdPgJM8=");
+    }
+
+}
