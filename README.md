@@ -22,17 +22,30 @@ to the require section of your composer.json.
 使用方式
 ------------
 ```
-$client = new \aliyun\live\Client([
+$live = new \aliyun\live\Client([
     'accessKeyId' => '123456',
     'accessSecret' => '123456'
+    'appName' => 'live',
+    'domain' => 'live.cctv.com',
+    'pushAuth' => '1234567',
 ]);
+
+//发送接口请求
 $package = [
     'Action' => 'DescribeLiveStreamsPublishList',
     'DomainName' => 'live.cctv.com',
     'StartTime' => gmdate('Y-m-d\TH:i:s\Z', strtotime('2017-03-15')),
     'EndTime' => gmdate('Y-m-d\TH:i:s\Z', strtotime('2017-04-01')),
 ];
-$response = $client->createRequest($package);
+$response = $live->createRequest($package);
 print_r($response);
+//非请求接口
+生成推流地址
+$live->getPushPath();
+$live->getPushArg($uuid);
+
+//获取播放地址
+$live->getPlayUrls($uuid);
+
 exit;
 ```
