@@ -41,6 +41,14 @@ class Client
      */
     public $accessSecret;
 
+    /**
+     * @var string API版本
+     */
+    public $version = '2016-11-01';
+
+    /**
+     * @var string 网关地址
+     */
     public $baseUri = 'http://live.aliyuncs.com/';
 
     /**
@@ -70,6 +78,7 @@ class Client
             $middleware = new Rpc([
                 'accessKeyId' => $this->accessKeyId,
                 'accessSecret' => $this->accessSecret,
+                'Version' => $this->version
             ]);
             $stack->push($middleware);
 
@@ -92,6 +101,6 @@ class Client
      */
     public function createRequest(array $params)
     {
-        return $this->getHttpClient()->get('/',['query'=>$params]);
+        return $this->getHttpClient()->get('/', ['query' => $params]);
     }
 }
