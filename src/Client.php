@@ -52,18 +52,82 @@ class Client
     public $baseUri = 'http://live.aliyuncs.com/';
 
     /**
+     * @var string 应用名称
+     */
+    public $appName;
+
+    /**
+     * @var string 应用域名
+     */
+    public $domain;
+
+    /**
+     * @var string 推流鉴权
+     */
+    public $pushAuth;
+
+    /**
+     * @var string 媒体中心地址
+     */
+    public $pushDomain = 'video-center.alivecdn.com';
+
+    /**
+     * @var bool 是否使用安全连接
+     */
+    public $secureConnection = false;
+
+    /**
+     * @var int 签名有效期,默认有效期是一周
+     */
+    public $authTime = 604800;
+
+    /**
+     * @var int 秘钥过期时间
+     */
+    private $expirationTime;
+
+    /**
+     * @var string 播放协议
+     */
+    private $playScheme;
+
+    /**
+     * @var string 播放地址
+     */
+    private $httpPlayUrl;
+
+    /**
      * @var HttpClient
      */
     private $_httpClient;
 
     /**
-     * Request constructor.
+     * Client constructor.
      * @param array $config
+     * @throws \Exception
      */
     public function __construct($config = [])
     {
         foreach ($config as $name => $value) {
             $this->{$name} = $value;
+        }
+
+        $this->expirationTime = time() + $this->authTime;
+        $this->playScheme = $this->secureConnection ? 'https://' : 'http://';
+        $this->httpPlayUrl = $this->playScheme . $this->domain;
+
+        if (empty ($this->accessKeyId)) {
+            throw new \Exception ('The "accessKeyId" property must be set.');
+        }
+        if (empty ($this->accessSecret)) {
+            throw new \Exception ('The "accessSecret" property must be set.');
+        }
+        if (empty ($this->appName)) {
+            throw new \Exception ('The "appName" property must be set.');
+        }
+
+        if (empty ($this->domain)) {
+            throw new \Exception ('The "domain" property must be set.');
         }
     }
 
@@ -102,5 +166,137 @@ class Client
     public function createRequest(array $params)
     {
         return $this->getHttpClient()->get('/', ['query' => $params]);
+    }
+
+    /**
+     * 直播签名
+     * @param string $streamName
+     * @return string
+     */
+    protected function getSign($streamName)
+    {
+        $uri = "/{$this->appName}/{$streamName}";
+        if ($this->pushAuth) {
+            $authKey = "?vhost={$this->domain}&auth_key={$this->expirationTime}-0-0-" . md5("{$uri}-{$this->expirationTime}-0-0-{$this->pushAuth}");
+        } else {
+            $authKey = "?vhost={$this->domain}";
+        }
+        return $authKey;
+    }
+
+    /**
+     * 获取推流地址
+     * @return string
+     */
+    public function getPushPath()
+    {
+        return "rtmp://{$this->pushDomain}/{$this->appName}/";
+    }
+
+    /**
+     * 获取串码流
+     * @param string $streamName 流名称
+     * @return string
+     */
+    public function getPushArg($streamName)
+    {
+        return $streamName . $this->getSign($streamName);
+    }
+
+    /**
+     * 获取直播推流地址
+     * @param string $streamName
+     * @return string
+     */
+    public function getPushUrl($streamName)
+    {
+        $uri = "/{$this->appName}/{$streamName}";
+        return "rtmp://{$this->pushDomain}" . $uri . $this->getSign($streamName);
+    }
+
+    /**
+     * 验证签名
+     * @param string $streamName
+     * @param string $usrargs
+     * @return bool
+     */
+    public function checkSign($streamName, $usrargs)
+    {
+        parse_str($usrargs, $args);
+        if (isset($args['vhost']) && isset($args['auth_key'])) {
+            if ($args['vhost'] != $this->domain) {
+                return false;
+            }
+            $params = explode('-', $args['auth_key'], 4);
+            if (isset($params[0]) && $params[3]) {
+                $uri = "/{$this->appName}/{$streamName}";
+                if ($params[3] == md5("{$uri}-{$params[0]}-0-0-{$this->pushAuth}")) {
+                    return true;
+                }
+
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 获取签名
+     * @param string $uri
+     * @return string
+     */
+    protected function getAuthKey($uri)
+    {
+        $authKey = '';
+        if ($this->pushAuth) {
+            $authKey = "?auth_key={$this->expirationTime}-0-0-" . md5("{$uri}-{$this->expirationTime}-0-0-{$this->pushAuth}");
+        }
+        return $authKey;
+    }
+
+    /**
+     * 获取RTMP拉流地址
+     * @param string $streamName
+     * @return string
+     */
+    public function getPlayUrlForRTMP($streamName)
+    {
+        $uri = "/{$this->appName}/{$streamName}";
+        return 'rtmp://' . $this->domain . $uri . $this->getAuthKey($uri);
+    }
+
+    /**
+     * 获取FLV播放地址
+     * @param string $streamName
+     * @return string
+     */
+    public function getPlayUrlForFLV($streamName)
+    {
+        $uri = "/{$this->appName}/{$streamName}.flv";
+        return $this->httpPlayUrl . $uri . $this->getAuthKey($uri);
+    }
+
+    /**
+     * 获取M3U8播放地址
+     * @param string $streamName
+     * @return string
+     */
+    public function getPlayUrlForM3U8($streamName)
+    {
+        $uri = "/{$this->appName}/{$streamName}.m3u8";
+        return $this->httpPlayUrl . $uri . $this->getAuthKey($uri);
+    }
+
+    /**
+     * 获取阿里云播放地址
+     * @param string $streamName
+     * @return array
+     */
+    public function getPlayUrls($streamName)
+    {
+        return [
+            'rtmp' => $this->getPlayUrlForRTMP($streamName),
+            'flv' => $this->getPlayUrlForFLV($streamName),
+            'm3u8' => $this->getPlayUrlForM3U8($streamName)
+        ];
     }
 }
