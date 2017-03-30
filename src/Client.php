@@ -169,6 +169,39 @@ class Client
     }
 
     /**
+     * 禁止推流
+     * @param string $streamName
+     * @return string
+     */
+    public function ForbidLiveStream($streamName)
+    {
+        return $this->createRequest([
+            'Action' => 'ForbidLiveStream',
+            'DomainName' => $this->domain,
+            'AppName' => $this->appName,
+            'StreamName' => $streamName,
+            'LiveStreamType' => 'publisher',
+            'ResumeTime' => gmdate('Y-m-d\TH:i:s\Z', mktime(0, 0, 0, 1, 1, 2099))
+        ]);
+    }
+
+    /**
+     * 允许推流
+     * @param string $streamName
+     * @return string
+     */
+    public function StartLiveStream($streamName)
+    {
+        return $this->createRequest([
+            'Action' => 'StartLiveStream',
+            'DomainName' => $this->domain,
+            'AppName' => $this->appName,
+            'StreamName' => $streamName,
+            'LiveStreamType' => 'publisher'
+        ]);
+    }
+
+    /**
      * 直播签名
      * @param string $streamName
      * @return string
