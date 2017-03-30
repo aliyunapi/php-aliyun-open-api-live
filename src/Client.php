@@ -173,7 +173,7 @@ class Client
      * @param string $streamName
      * @return string
      */
-    public function ForbidLiveStream($streamName)
+    public function forbidLiveStream($streamName)
     {
         return $this->createRequest([
             'Action' => 'ForbidLiveStream',
@@ -190,10 +190,10 @@ class Client
      * @param string $streamName
      * @return string
      */
-    public function StartLiveStream($streamName)
+    public function startLiveStream($streamName)
     {
         return $this->createRequest([
-            'Action' => 'StartLiveStream',
+            'Action' => 'ResumeLiveStream',
             'DomainName' => $this->domain,
             'AppName' => $this->appName,
             'StreamName' => $streamName,
@@ -208,7 +208,7 @@ class Client
      * @param null|int $endTime
      * @return string
      */
-    public function DescribeLiveStreamOnlineUserNum($streamName = null, $startTime = null, $endTime = null)
+    public function describeLiveStreamOnlineUserNum($streamName = null, $startTime = null, $endTime = null)
     {
         $params = [
             'Action' => 'DescribeLiveStreamOnlineUserNum',
@@ -229,7 +229,7 @@ class Client
      * 查询在线的直播推流列表
      * @return string
      */
-    public function DescribeLiveStreamsOnlineList()
+    public function describeLiveStreamsOnlineList()
     {
         return $this->createRequest([
             'Action' => 'DescribeLiveStreamsOnlineList',
