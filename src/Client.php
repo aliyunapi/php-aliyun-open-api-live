@@ -160,8 +160,9 @@ class Client
     }
 
     /**
+     * 发起Api请求
      * @param array $params
-     * @return string
+     * @return \Psr\Http\Message\ResponseInterface
      */
     public function createRequest(array $params)
     {
