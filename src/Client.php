@@ -202,6 +202,43 @@ class Client
     }
 
     /**
+     * 实时查询在线人数的请求参数
+     * @param null|string $streamName
+     * @param null|int $startTime
+     * @param null|int $endTime
+     * @return string
+     */
+    public function DescribeLiveStreamOnlineUserNum($streamName = null, $startTime = null, $endTime = null)
+    {
+        $params = [
+            'Action' => 'DescribeLiveStreamOnlineUserNum',
+            'DomainName' => $this->domain,
+            'AppName' => $this->appName
+        ];
+        if (!empty($streamName)) {
+            $params['StreamName'] = $streamName;
+        }
+        if (!empty($startTime) && !empty($endTime)) {
+            $params['StartTime'] = gmdate('Y-m-d\TH:i:s\Z', $startTime);
+            $params['EndTime'] = gmdate('Y-m-d\TH:i:s\Z', $endTime);
+        }
+        return $this->createRequest($params);
+    }
+
+    /**
+     * 查询在线的直播推流列表
+     * @return string
+     */
+    public function DescribeLiveStreamsOnlineList()
+    {
+        return $this->createRequest([
+            'Action' => 'DescribeLiveStreamsOnlineList',
+            'DomainName' => $this->domain,
+            'AppName' => $this->appName
+        ]);
+    }
+
+    /**
      * 直播签名
      * @param string $streamName
      * @return string
