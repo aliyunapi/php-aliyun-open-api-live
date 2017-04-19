@@ -17,29 +17,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 namespace aliyun\test;
 
-use aliyun\core\Client;
-
-use aliyun\core\profile\DefaultProfile;
+use aliyun\live\Client;
 
 class TestCase extends \PHPUnit_Framework_TestCase
 {
 
+    /**
+     * @var null|Client
+     */
     public $client = null;
 
     function setUp()
     {
-        $iClientProfile = DefaultProfile::getProfile("cn-hangzhou", "5slyhuy4sv30bmppvgew0rps", "NGYL1I7hXC6SgSqkcE5DJdPgJM8=");
-        $this->client = new Client($iClientProfile);
+        $this->client = new Client([
+            'accessKeyId' => '123456',
+            'accessSecret' => '123456',
+            'appName' => 'live',
+            'domain' => 'live.cctv.com',
+            'pushAuth' => '1234567',
+        ]);
     }
-
-
-    function getProperty($propertyKey)
-    {
-        $accessKey = "";
-        $accessSecret = "";
-        $iClientProfile = DefaultProfile::getProfile("cn-hangzhou", "5slyhuy4sv30bmppvgew0rps", "NGYL1I7hXC6SgSqkcE5DJdPgJM8=");
-    }
-
 }

@@ -239,12 +239,14 @@ class Client
         ]);
     }
 
+
+
     /**
      * 直播签名
      * @param string $streamName
      * @return string
      */
-    protected function getSign($streamName)
+    public function getSign($streamName)
     {
         $uri = "/{$this->appName}/{$streamName}";
         if ($this->pushAuth) {
@@ -369,5 +371,24 @@ class Client
             'flv' => $this->getPlayUrlForFLV($streamName),
             'm3u8' => $this->getPlayUrlForM3U8($streamName)
         ];
+    }
+
+    /**
+     * 设置签名过期时间
+     * @param int $expirationTime
+     * @return $this
+     */
+    public function setExpirationTime($expirationTime)
+    {
+        $this->expirationTime = $expirationTime;
+        return $this;
+    }
+
+    /**
+     * 获取签名过期时间
+     * @return int
+     */
+    public function getExpirationTime(){
+        return $this->expirationTime;
     }
 }
