@@ -1,6 +1,8 @@
 # php-aliyun-open-api-live
 
 [![Build Status](https://travis-ci.org/aliyunapi/php-aliyun-open-api-live.svg?branch=master)](https://travis-ci.org/aliyunapi/php-aliyun-open-api-live)
+[![Latest Stable Version](https://poser.pugx.org/aliyunapi/php-aliyun-open-api-live/v/stable.png)](https://packagist.org/packages/aliyunapi/php-aliyun-open-api-live)
+[![Total Downloads](https://poser.pugx.org/aliyunapi/php-aliyun-open-api-live/downloads.png)](https://packagist.org/packages/aliyunapi/php-aliyun-open-api-live)
 
 Installation
 ------------
