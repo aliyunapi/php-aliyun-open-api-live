@@ -239,8 +239,6 @@ class Client
         ]);
     }
 
-
-
     /**
      * 直播签名
      * @param string $streamName
@@ -388,7 +386,24 @@ class Client
      * 获取签名过期时间
      * @return int
      */
-    public function getExpirationTime(){
+    public function getExpirationTime()
+    {
         return $this->expirationTime;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPlayScheme()
+    {
+        return $this->playScheme;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHttpPlayUrl()
+    {
+        return $this->httpPlayUrl;
     }
 }
