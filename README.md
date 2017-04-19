@@ -1,5 +1,7 @@
 # php-aliyun-open-api-live
 
+[![Build Status](https://travis-ci.org/aliyunapi/php-aliyun-open-api-live.svg?branch=master)](https://travis-ci.org/aliyunapi/php-aliyun-open-api-live)
+
 Installation
 ------------
 
