@@ -21,7 +21,8 @@ class ClientTest extends TestCase
     {
         $this->client->setExpirationTime(1488966279);
         $sign = $this->client->getSign('123456');
-        $this->assertTrue($this->client->checkSign('123456',$sign));
+
+        $this->assertTrue($this->client->checkSign('123456',substr($sign,1)));
 
         $sign = $this->client->getSign('123456');
         $this->assertFalse($this->client->checkSign('1234567',$sign));
