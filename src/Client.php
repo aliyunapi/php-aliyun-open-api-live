@@ -49,7 +49,7 @@ class Client
     /**
      * @var string 网关地址
      */
-    public $baseUri = 'http://live.aliyuncs.com/';
+    public $baseUri = 'https://live.aliyuncs.com/';
 
     /**
      * @var string 应用名称
