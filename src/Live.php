@@ -4,6 +4,7 @@
  * @copyright Copyright (c) 2012 TintSoft Technology Co. Ltd.
  * @license http://www.tintsoft.com/license/
  */
+
 namespace aliyun\live;
 
 use yii\base\Component;
@@ -59,6 +60,11 @@ class Live extends Component
     public $pushDomain = 'video-center.alivecdn.com';
 
     /**
+     * @var string
+     */
+    public $recordDomain;
+
+    /**
      * @var bool 是否使用安全连接
      */
     public $secureConnection = false;
@@ -92,7 +98,8 @@ class Live extends Component
      * 初始化直播组件
      * @throws InvalidConfigException
      */
-    public function init(){
+    public function init()
+    {
         parent::init();
         $this->expirationTime = time() + $this->authTime;
         $this->playScheme = $this->secureConnection ? 'https://' : 'http://';
@@ -111,6 +118,10 @@ class Live extends Component
         if (empty ($this->domain)) {
             throw new InvalidConfigException ('The "domain" property must be set.');
         }
+        if (empty ($this->recordDomain)) {
+            throw new InvalidConfigException ('The "domain" property must be set.');
+        }
+
     }
 
     /**
@@ -379,6 +390,16 @@ class Live extends Component
     public function getPlayScheme()
     {
         return $this->playScheme;
+    }
+
+    /**
+     * 获取录像播放地址
+     * @param string $uri
+     * @return string
+     */
+    public function getRecordUrl($uri)
+    {
+        return '//' . $this->recordDomain . '/' . $uri;
     }
 
     /**
