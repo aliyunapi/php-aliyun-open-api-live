@@ -119,7 +119,7 @@ class Live extends Component
             throw new InvalidConfigException ('The "domain" property must be set.');
         }
         if (empty ($this->recordDomain)) {
-            throw new InvalidConfigException ('The "domain" property must be set.');
+            throw new InvalidConfigException ('The "recordDomain" property must be set.');
         }
 
     }

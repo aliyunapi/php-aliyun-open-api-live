@@ -82,6 +82,11 @@ class Client
     public $authTime = 604800;
 
     /**
+     * @var string
+     */
+    public $recordDomain;
+
+    /**
      * @var int 秘钥过期时间
      */
     private $expirationTime;
@@ -128,6 +133,10 @@ class Client
 
         if (empty ($this->domain)) {
             throw new \Exception ('The "domain" property must be set.');
+        }
+
+        if (empty ($this->recordDomain)) {
+            throw new \Exception ('The "recordDomain" property must be set.');
         }
     }
 
@@ -389,6 +398,16 @@ class Client
     public function getExpirationTime()
     {
         return $this->expirationTime;
+    }
+
+    /**
+     * 获取录像播放地址
+     * @param string $uri
+     * @return string
+     */
+    public function getRecordUrl($uri)
+    {
+        return '//' . $this->recordDomain . '/' . $uri;
     }
 
     /**
